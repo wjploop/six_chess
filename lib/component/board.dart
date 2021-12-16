@@ -27,16 +27,25 @@ class Board extends StatelessWidget {
 
     GameData data = GameData.of(context);
 
-    List<Widget> pieces(List<List> data) {
+    List<Widget> pieces(List<List> data, List<List> status) {
       List<Widget> widgets = [];
       int n = data.length;
       int m = data[0].length;
-      for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= m; j++) {
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
           widgets.add(Positioned(
-              top: i * gridWidth - pieceWidth / 2,
-              left: j * gridWidth - pieceWidth / 2,
-              child: Piece(width: pieceWidth)));
+              top: gridWidth + i * gridWidth - pieceWidth / 2,
+              left: gridWidth + j * gridWidth - pieceWidth / 2,
+              child: GestureDetector(
+                onTap: () {
+                  Game.of(context).onTap(i, j);
+                },
+                child: Piece(
+                  width: pieceWidth,
+                  type: data[i][j],
+                  status: status[i][j],
+                ),
+              )));
         }
       }
       return widgets;
@@ -55,7 +64,7 @@ class Board extends StatelessWidget {
           child: CustomPaint(
             painter: BoardPainter(gridWidth),
             child: Stack(
-              children: pieces(data.data),
+              children: pieces(data.data, data.status),
             ),
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:six_chess/component/piece.dart';
 
 enum GameState {
   created,
@@ -8,14 +9,29 @@ enum GameState {
   finished,
 }
 
+
+
+const List<List> INIT_PIECE_DATA = [
+  [1, 1, 1, 1],
+  [1, 0, 0, 1],
+  [0, 0, 0, 0],
+  [-1, 0, 0, -1],
+  [-1, -1, -1, -1],
+];
+
+List<List> INIT_PIECE_STATUS =
+    List.generate(5, (index) => List.generate(4, (i) => PieceStatus.none));
+
 class GameData extends InheritedWidget {
   @override
   final Widget child;
 
-  final List<List> data;
   final GameState state;
 
-  GameData(this.state, this.data, {required this.child, Key? key})
+  final List<List> data;
+  final List<List> status;
+
+  GameData(this.state, this.data, this.status, {required this.child, Key? key})
       : super(key: key, child: child);
 
   static GameData of(BuildContext context) {
@@ -27,3 +43,4 @@ class GameData extends InheritedWidget {
     return true;
   }
 }
+

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:six_chess/component/Log.dart';
-
-import 'game.dart';
+import 'package:six_chess/component/constant.dart';
 
 enum PieceStatus {
   none,
@@ -51,34 +49,33 @@ class _PieceState extends State<Piece> {
     } else {
       piece = Container();
     }
-    log(" piece selected ${widget.status}");
     return Container(
       width: widget.width,
       height: widget.width,
       child: Stack(
         children: [
           Positioned(
+              child: Center(
+                child: AnimatedOpacity(
+                  duration: duration_piece_scale,
+                  opacity: widget.status == PieceStatus.palce_able ? 1 : 0,
+                  child: Container(
+                    width: widget.width / 3,
+                    height: widget.width / 3,
+                    decoration: BoxDecoration(
+                        color: Colors.lightGreen[800], shape: BoxShape.circle),
+                  ),
+                ),
+              )),
+          Positioned(
             child: AnimatedScale(
-              duration: Duration(milliseconds: 200),
+              duration: duration_piece_scale,
               scale: widget.status == PieceStatus.selected ? 1.2 : 1.0,
               child: Container(
                 child: piece,
               ),
             ),
           ),
-          Positioned(
-              child: Center(
-            child: AnimatedOpacity(
-              duration: Duration(milliseconds: 300),
-              opacity: widget.status == PieceStatus.palce_able ? 1 : 0,
-              child: Container(
-                width: widget.width/3,
-                height: widget.width/3,
-                decoration: BoxDecoration(
-                    color: Colors.lightGreen[800], shape: BoxShape.circle),
-              ),
-            ),
-          ))
         ],
       ),
     );

@@ -11,7 +11,7 @@ enum GameState {
 
 
 
-const List<List> INIT_PIECE_DATA = [
+List<List> INIT_PIECE_DATA = [
   [1, 1, 1, 1],
   [1, 0, 0, 1],
   [0, 0, 0, 0],

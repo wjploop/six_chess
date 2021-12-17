@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:six_chess/component/Log.dart';
+import 'package:six_chess/component/constant.dart';
 import 'package:six_chess/component/piece.dart';
 
 import 'game_data.dart';
@@ -22,6 +24,8 @@ const N = 5;
 const M = 4;
 
 const LIST_NONE = [-1, -1];
+
+Function eq = const ListEquality().equals;
 
 class GameControl extends State<Game> {
   GameState _state = GameState.created;
@@ -50,13 +54,13 @@ class GameControl extends State<Game> {
     return LIST_NONE;
   }
 
-  void onTap(int i, int j) {
+  void onTap(int i, int j) async {
     log("onTap $i $j");
 
     List selected = find((y, x) => _status[y][x] == PieceStatus.selected);
 
     if (selected == LIST_NONE) {
-      log("select $i $j");
+      log("selecting ${[i, j]}");
       if (_data[i][j] != 0) {
         _status[i][j] = PieceStatus.selected;
         log("find place able ");
@@ -65,31 +69,46 @@ class GameControl extends State<Game> {
       return;
     }
 
-    log("has selected $selected");
-    // todo 使用List 比较元素时，比较的是内存地址
-    if (containsList(_findPlaceAble(selected[0], selected[1]), [i, j])) {
-      _findPlaceAble(selected[0], selected[1]).forEach((p) {
+    log("had selected $selected");
+
+    if (eq(selected, [i, j])) {
+      log("taped on same pos $selected, just scale to min and then scale to "
+          "max");
+      _status[i][j] = PieceStatus.none;
+      setState(() {});
+      await Future.delayed(duration_piece_scale);
+      _status[i][j] = PieceStatus.selected;
+      setState(() {});
+      return;
+    }
+    var placeAbleFromSelected = _findPlaceAble(selected[0], selected[1]);
+    if (containsList(placeAbleFromSelected, [i, j])) {
+      placeAbleFromSelected.forEach((p) {
         _status[p[0]][p[1]] = PieceStatus.none;
       });
       log("move from $selected to ${[i, j]}");
       _movePiece(selected, [i, j]);
       return;
-    }
-    visitGrid((y, x) => {
-          if (_status[y][x] == PieceStatus.selected)
-            {_status[y][x] = PieceStatus.none}
-          else if (_status[y][x] == PieceStatus.palce_able)
-            {_status[y][x] = PieceStatus.none}
+    } else {
+      log("tip cannot move from $selected to ${[i, j]}");
+      if (_data[selected[0]][selected[1]] == _data[i][j]) {
+        log("re selected piece");
+        placeAbleFromSelected.forEach((p) {
+          _status[p[0]][p[1]] = PieceStatus.none;
         });
-
-    _status[i][j] = PieceStatus.selected;
-    _updatePlaceAble(_findPlaceAble(i, j));
-
-    setState(() {});
+        _status[selected[0]][selected[1]] = PieceStatus.none;
+        _status[i][j] = PieceStatus.selected;
+        _updatePlaceAble(_findPlaceAble(i, j));
+        setState(() {});
+      } else {
+        _tryMovePiece(selected, [i, j]);
+      }
+      return;
+    }
   }
 
   bool containsList(List list, List target) {
-    if(list.isEmpty) {
+    if (list.isEmpty) {
       return false;
     }
     log("check containList $list target $target");
@@ -101,14 +120,37 @@ class GameControl extends State<Game> {
     return false;
   }
 
-  _movePiece(List f, List t) {
+  _tryMovePiece(List f, List t) async {
+    var fromPiece = _data[f[0]][f[1]];
+    var toPiece = _data[t[0]][t[1]];
+    _data[f[0]][f[1]] = 0;
+    _data[t[0]][t[1]] = fromPiece;
+    _status[t[0]][t[1]] = PieceStatus.selected;
+    setState(() {});
+    await Future.delayed(duration_piece_scale);
+    _data[f[0]][f[1]] = fromPiece;
+    _data[t[0]][t[1]] = toPiece;
+    _status[f[0]][f[1]] = PieceStatus.selected;
+    _status[t[0]][t[1]] = PieceStatus.none;
+    setState(() {});
+  }
+
+  _movePiece(List f, List t) async {
     var piece = _data[f[0]][f[1]];
     _data[f[0]][f[1]] = 0;
     _data[t[0]][t[1]] = piece;
+    _status[t[0]][t[1]] = PieceStatus.selected;
 
-    _status[f[0]][f[1]] = PieceStatus.last_action_from;
-    _status[t[0]][t[1]] = PieceStatus.last_action_current;
     setState(() {});
+    await Future.delayed(duration_piece_scale);
+    _status[f[0]][f[1]] = PieceStatus.none;
+    _status[t[0]][t[1]] = PieceStatus.none;
+    setState(() {});
+
+    // await Future.delayed(duration_piece_scale);
+    // _status[f[0]][f[1]] = PieceStatus.last_action_from;
+    // _status[t[0]][t[1]] = PieceStatus.last_action_current;
+    //
   }
 
   void _updatePlaceAble(List list) {
@@ -159,8 +201,8 @@ class GameControl extends State<Game> {
     // var data = _deepCopyTwoDimension(_data);
     // var status = _deepCopyTwoDimension(_status);
     //
-    log(_data.toString().replaceAll("], ", "]\n"));
-    log(_status.toString().replaceAll("], ", "]\n"));
+    // log(_data.toString().replaceAll("], ", "]\n").replaceAll(",", "\t"));
+    // log(_status.toString().replaceAll("], ", "]\n").replaceAll(",", "\t").replaceAll("PieceStatus.", ""));
     return GameData(_state, _data, _status, child: widget.child);
   }
 

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:six_chess/component/constant.dart';
 import 'package:six_chess/component/game.dart';
 import 'package:six_chess/component/piece.dart';
 
@@ -33,17 +34,26 @@ class Board extends StatelessWidget {
       int m = data[0].length;
       for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
-          widgets.add(Positioned(
-              top: gridWidth + i * gridWidth - pieceWidth / 2,
-              left: gridWidth + j * gridWidth - pieceWidth / 2,
+          widgets.add(AnimatedPositioned(
+              duration: duration_piece_scale,
+              top: gridWidth / 2 + i * gridWidth,
+              left: gridWidth / 2 + j * gridWidth,
+              width: gridWidth,
+              height: gridWidth,
               child: GestureDetector(
                 onTap: () {
                   Game.of(context).onTap(i, j);
                 },
-                child: Piece(
-                  width: pieceWidth,
-                  type: data[i][j],
-                  status: status[i][j],
+                child: Container(
+                  // 用于接受触摸事件
+                  color: Colors.transparent,
+                  child: Center(
+                    child: Piece(
+                      width: pieceWidth,
+                      type: data[i][j],
+                      status: status[i][j],
+                    ),
+                  ),
                 ),
               )));
         }

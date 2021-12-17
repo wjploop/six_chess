@@ -1,11 +1,11 @@
-class Position {
+class Point {
   final int y, x;
 
-  Position(this.y, this.x);
+  Point(this.y, this.x);
 
   @override
   bool operator ==(Object other) {
-    if (other is Position) {
+    if (other is Point) {
       return other.y == y && other.x == x;
     }
     return false;

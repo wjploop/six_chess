@@ -1,18 +1,19 @@
 import 'package:six_chess/data/Position.dart';
 
 class PieceData {
-  // Position pos;
-  // PieceID id;
+  Point point;
+  PieceID id;
 
-  // int type;
-  // Position origin;
-  //
-  // PieceData(this.pos, this.id)
-  //     : type = id.toString().split("_")[1] == a ? PieceType.a : PieceType.b
-  // ,origin = id.toString().split("_")[2]
-  // ;
+  PieceType type;
+  Point origin;
+
+  PieceData(this.point, this.id)
+      : type = id.toString().split("_")[1] == "a" ? PieceType.a : PieceType.b,
+        origin = Point(int.parse(id.toString().split("_")[2].toString()) ~/ 10,
+            int.parse(id.toString().split("_")[2].toString()) % 10);
 }
 
+var pieces = PieceID.values.map((id) => PieceData(point, id))
 enum PieceType { a, b }
 
 enum PieceID {
